@@ -1,0 +1,44 @@
+# Blueprint de Render (plan gratuito): un único Web Service Node que sirve frontend/dist y /api,
+# y una base PostgreSQL gratuita en la misma región, conectada por DATABASE_URL (fromDatabase).
+services:
+  - type: web
+    name: custodia-digital
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/salud
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: custodia-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SEED_DEMO
+        value: "true"
+      - key: STORAGE_MAX_KB
+        value: "5120"
+      - key: STORAGE_QUOTA_MB
+        value: "300"
+      # Secretos: se introducen a mano en el panel de Render (nunca en Git).
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false
+
+databases:
+  - name: custodia-db
+    plan: free
+    region: oregon
+    databaseName: custodia
+    user: custodia
+    ipAllowList: []   # solo acceso privado desde servicios de Render

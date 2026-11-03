@@ -1,0 +1,32 @@
+# Sistema de Cadena de Custodia de Evidencia Digital — prototipo académico.
+#   docker compose up --build -d
+#   docker compose run --rm api node dist/seed.js     # (opcional) datos de demostración ficticios
+# Interfaz: http://localhost:8080
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: custodia
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-custodia_dev}
+      POSTGRES_DB: custodia
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U custodia"], interval: 5s, timeout: 3s, retries: 10 }
+
+  api:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      DATABASE_URL: postgresql://custodia:${DB_PASSWORD:-custodia_dev}@db:5432/custodia
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET en .env (cadena larga y aleatoria)}
+      CORS_ORIGIN: http://localhost:8080
+      NODE_ENV: production
+    volumes: [storage:/data/storage]
+    restart: unless-stopped
+
+  web:
+    build: { context: ., dockerfile: frontend/Dockerfile }
+    depends_on: [api]
+    ports: ["8080:80"]
+    restart: unless-stopped
+
+volumes: { pgdata: {}, storage: {} }

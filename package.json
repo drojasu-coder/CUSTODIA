@@ -1,0 +1,14 @@
+{
+  "name": "custodia-digital",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Custodia Digital: frontend (React/Vite) + API (Express) en un único servicio Node.",
+  "scripts": {
+    "build:frontend": "cd frontend && npm ci --include=dev --no-audit --no-fund && npm run build",
+    "build:backend": "cd backend && npm ci --include=dev --no-audit --no-fund && npm run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "migrate": "node backend/dist/migrate.js",
+    "start": "node backend/dist/server.js"
+  },
+  "engines": { "node": ">=20 <23" }
+}

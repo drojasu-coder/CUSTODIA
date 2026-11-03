@@ -1,0 +1,18 @@
+# Solo la base de datos. La API y la interfaz se ejecutan en su equipo (npm run dev).
+#   docker compose up -d
+# El esquema (db/schema.sql) se aplica solo la primera vez que se crea el contenedor.
+# Para empezar de cero:  docker compose down -v
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: custodia-db
+    environment:
+      POSTGRES_USER: custodia
+      POSTGRES_PASSWORD: custodia
+      POSTGRES_DB: custodia
+    ports: ["${DB_PORT:-5432}:5432"]   # si 5432 está ocupado: DB_PORT=5433 docker compose up -d
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    restart: unless-stopped
+volumes: { pgdata: {} }
