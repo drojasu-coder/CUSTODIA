@@ -81,7 +81,7 @@ export function CasoDetalle() {
       {abierto && data.pendientes_cierre.length > 0 && can('cerrar_caso') && <Notice tone="warn">El caso no puede cerrarse todavía: {data.pendientes_cierre.join(', ')}.</Notice>}
       <section className="card"><div className="card-head"><h2>Evidencias</h2></div>
         {data.evidencias.length === 0 ? <Empty icon="drive" title="Sin evidencias visibles" /> :
-          <div className="table-wrap"><table><thead><tr><th>Código</th><th>Referencia</th><th>Tipo</th><th>Semáforo</th><th>Estado</th><th>Integridad</th><th>Custodio</th></tr></thead>
+          <div className="table-wrap"><table><thead><tr><th>Código</th><th>Referencia</th><th>Tipo</th><th>Semáforo</th><th>Custodia</th><th>Integridad</th><th>Custodio</th></tr></thead>
             <tbody>{data.evidencias.map((e: any) => <tr key={e.id_evidencia}><td><Link to={'/evidencias/' + e.id_evidencia}><strong>{e.codigo_unico}</strong></Link></td><td>{e.nombre_referencia}</td><td>{e.tipo}</td>
               <td><SemaforoBadge estado={e.estado} integridad={e.integridad} /></td>
               <td><Badge map={ESTADO_EVID} v={e.estado} /></td><td><Badge map={INTEGRIDAD} v={e.integridad} /></td><td>{e.custodio}</td></tr>)}</tbody></table></div>}

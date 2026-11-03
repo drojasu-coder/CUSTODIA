@@ -22,7 +22,7 @@ export function Evidencias() {
           <select className="control" value={f.estado} onChange={e => set('estado', e.target.value)} aria-label="Estado"><option value="">Todos los estados</option>{Object.entries(ESTADO_EVID).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
           <select className="control" value={f.integridad} onChange={e => set('integridad', e.target.value)} aria-label="Integridad"><option value="">Toda integridad</option>{Object.entries(INTEGRIDAD).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
         {error ? <ErrorBox e={error} /> : !data ? <Loading /> : data.items.length === 0 ? <Empty icon="drive" title="Sin evidencias" text="No hay evidencias visibles con ese filtro." /> :
-          <div className="table-wrap"><table><thead><tr><th>Código</th><th>Referencia</th><th>Caso</th><th>Semáforo</th><th>Estado</th><th>Integridad</th><th>Custodio</th><th>Ubicación</th><th /></tr></thead>
+          <div className="table-wrap"><table><thead><tr><th>Código</th><th>Referencia</th><th>Caso</th><th>Semáforo</th><th>Custodia</th><th>Integridad</th><th>Custodio actual</th><th>Ubicación</th><th /></tr></thead>
             <tbody>{data.items.map((e: any) => <tr key={e.id_evidencia}><td><strong>{e.codigo_unico}</strong></td><td>{e.nombre_referencia}<div className="small muted">{e.tipo}</div></td><td>{e.codigo_caso}</td>
               <td><SemaforoBadge estado={e.estado} integridad={e.integridad} /></td>
               <td><Badge map={ESTADO_EVID} v={e.estado} /></td><td><Badge map={INTEGRIDAD} v={e.integridad} /></td><td>{e.custodio}</td><td>{e.ubicacion}</td>
@@ -128,9 +128,9 @@ export function EvidenciaDetalle() {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <Detail items={[
-              ['Semáforo', <SemaforoBadge estado={e.estado} integridad={e.integridad} />],
-              ['Estado', <Badge map={ESTADO_EVID} v={e.estado} />],
-              ['Integridad', <Badge map={INTEGRIDAD} v={e.integridad} />],
+              ['Semáforo (Integridad)', <SemaforoBadge estado={e.estado} integridad={e.integridad} />],
+              ['Custodia operativa', <Badge map={ESTADO_EVID} v={e.estado} />],
+              ['Integridad hash', <Badge map={INTEGRIDAD} v={e.integridad} />],
               ['Custodio actual', e.custodio],
               ['Ubicación', e.ubicacion],
               ['Recolector', e.recolector],
@@ -150,8 +150,8 @@ export function EvidenciaDetalle() {
       <div className="semaforo-card">
         <div className="semaforo-card-head">
           <div>
-            <strong>Evaluación de integridad en cadena de custodia</strong>
-            <div className="small muted">Control en tiempo real según el protocolo forense y huella digital SHA-256</div>
+            <strong>Evaluación de integridad criptográfica (SHA-256)</strong>
+            <div className="small muted">Verificación independiente del archivo frente al estado de custodia operativa</div>
           </div>
           <SemaforoBadge estado={e.estado} integridad={e.integridad} />
         </div>

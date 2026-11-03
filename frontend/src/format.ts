@@ -58,20 +58,56 @@ export type SemaforoColor = 'verde' | 'amarillo' | 'rojo';
 export interface SemaforoInfo { color: SemaforoColor; label: string; tone: 'good' | 'warn' | 'bad'; desc: string }
 export function getSemaforoIntegridad(estado?: string | null, integridad?: string | null): SemaforoInfo {
   const est = estado ?? '', integ = integridad ?? '';
+  // 1. Rojo: Discrepancia detectada o alerta de integridad abierta
   if (est === 'con_alerta' || integ === 'no_coincide' || integ === 'en_revision') {
-    return { color: 'rojo', label: integ === 'en_revision' ? 'En revisión' : 'Anomalía', tone: 'bad', desc: 'Discrepancia en la huella SHA-256 o alerta de integridad en curso.' };
+    return {
+      color: 'rojo',
+      label: integ === 'en_revision' ? 'En revisión' : 'Discrepancia / Alerta',
+      tone: 'bad',
+      desc: 'Discrepancia detectada en la huella SHA-256 o alerta de integridad en curso.'
+    };
+  }
+  // 2. Amarillo: Hash sin verificar o estado operativo en tránsito/análisis
+  if (integ === 'sin_verificar') {
+    return {
+      color: 'amarillo',
+      label: 'Hash sin verificar',
+      tone: 'warn',
+      desc: 'Evidencia registrada; huella SHA-256 pendiente de primera comprobación periódica.'
+    };
   }
   if (est === 'transferida' || est === 'en_analisis') {
-    return { color: 'amarillo', label: est === 'transferida' ? 'En transferencia' : 'En análisis', tone: 'warn', desc: 'Evidencia en tránsito de transferencia o en análisis forense.' };
+    return {
+      color: 'amarillo',
+      label: est === 'transferida' ? 'En transferencia' : 'En análisis',
+      tone: 'warn',
+      desc: est === 'transferida'
+        ? 'Evidencia en proceso de transferencia de custodia física/lógica.'
+        : 'Evidencia bajo procedimiento de análisis pericial forense.'
+    };
   }
-  if (est === 'en_custodia' || est === 'verificada' || integ === 'verificada') {
-    return { color: 'verde', label: 'Íntegra en custodia', tone: 'good', desc: 'Evidencia bajo resguardo con huella digital SHA-256 intacta.' };
+  if (est === 'registrada' || est === 'recolectada') {
+    return {
+      color: 'amarillo',
+      label: 'Pendiente de verificación',
+      tone: 'warn',
+      desc: 'Evidencia recolectada; pendiente de comprobación pericial de hash.'
+    };
   }
-  if (integ === 'sin_verificar' || est === 'registrada' || est === 'recolectada') {
-    return { color: 'amarillo', label: 'Sin verificar', tone: 'warn', desc: 'Registrada; pendiente de primera verificación periódica de integridad.' };
+  // 3. Verde: Únicamente cuando la integridad ha sido realmente verificada y sin anomalías
+  if (integ === 'verificada' || est === 'verificada') {
+    return {
+      color: 'verde',
+      label: est === 'archivada' ? 'Archivada (verificada)' : 'Integridad verificada',
+      tone: 'good',
+      desc: 'Huella digital SHA-256 comprobada byte a byte y coincidente con el registro inmutable original.'
+    };
   }
-  if (est === 'archivada') {
-    return { color: 'verde', label: 'Archivada (íntegra)', tone: 'good', desc: 'Caso concluido con archivo íntegro y trazabilidad histórica.' };
-  }
-  return { color: 'verde', label: 'Íntegra', tone: 'good', desc: 'Estado íntegro verificado.' };
+  // Fallback por defecto: nunca verde por omisión
+  return {
+    color: 'amarillo',
+    label: 'Sin verificar',
+    tone: 'warn',
+    desc: 'Pendiente de comprobación periódica de integridad.'
+  };
 }
