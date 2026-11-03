@@ -4,6 +4,7 @@ import { Icon } from '../ui';
 
 export default function Login() {
   const { login } = useAuth();
+  const [u, setU] = useState(''), [p, setP] = useState(''), [err, setErr] = useState(''), [busy, setBusy] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr('');
     try {

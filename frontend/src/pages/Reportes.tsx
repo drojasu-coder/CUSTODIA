@@ -22,7 +22,19 @@ export default function Reportes({ admin }: { admin: boolean }) {
   const generar = async () => { setBusy(true); setErr(null); try { setRep(await api.get(`/reportes/${tipo}` + qs(filtros))); } catch (e) { setErr(e); setRep(null); } finally { setBusy(false); } };
   const csv = async () => { try { await api.download(`/reportes/${tipo}` + qs({ ...filtros, format: 'csv' }), `reporte_${tipo}.csv`); } catch (e) { toast((e as Error).message, 'error'); } };
   const usaFiltros = ['cadena', 'integridad', 'transferencias', 'solicitudes'].includes(tipo);
-  const fmt = (v: any, k: string) => v == null ? '—' : /^\d{4}-\d{2}-\d{2}T/.test(String(v)) ? dateFmt(v) : k === 'vence' ? String(v).slice(0, 10) : String(v);
+  const fmt = (v: any, k: string) => {
+    if (v == null || v === '') return '—';
+    const s = String(v);
+    if (k === 'vence') return s.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(s)) return dateFmt(v);
+    return s;
+  };
+  const colClass = (k: string) => {
+    if (/hash|obtenido|esperado/.test(k)) return 'mono break';
+    if (/firmas/.test(k)) return 'mono small break';
+    if (/codigo|copia|analisis|alerta/.test(k)) return 'mono';
+    return '';
+  };
   return (
     <div className="stack">
       <PageHead title={admin ? 'Reportes administrativos' : 'Reportes'} desc="Lectura y exportación. Cada generación queda registrada en la auditoría.">
@@ -38,7 +50,7 @@ export default function Reportes({ admin }: { admin: boolean }) {
       {err ? <ErrorBox e={err} /> : busy ? <Loading /> : !rep ? <Empty icon="report" title="Elija un reporte" text="Seleccione el tipo y los filtros, y presione Generar." /> :
         <section className="paper"><div className="small muted">Custodia Digital · Reporte generado por {rep.generado_por} · {dateFmt(rep.generado)}</div><h2 className="report-title">{rep.titulo}</h2>
           {rep.filas.length === 0 ? <Empty title="Sin datos" text="No hay registros para esos filtros." /> :
-            <div className="table-wrap"><table><thead><tr>{rep.columnas.map((c: any) => <th key={c.k}>{c.label}</th>)}</tr></thead><tbody>{rep.filas.map((r: any, i: number) => <tr key={i}>{rep.columnas.map((c: any) => <td key={c.k} className={/hash|obtenido|esperado/.test(c.k) ? 'mono break' : ''}>{fmt(r[c.k], c.k)}</td>)}</tr>)}</tbody></table></div>}
+            <div className="table-wrap"><table><thead><tr>{rep.columnas.map((c: any) => <th key={c.k}>{c.label}</th>)}</tr></thead><tbody>{rep.filas.map((r: any, i: number) => <tr key={i}>{rep.columnas.map((c: any) => <td key={c.k} className={colClass(c.k)}>{fmt(r[c.k], c.k)}</td>)}</tr>)}</tbody></table></div>}
           <p className="small muted spacer">{rep.filas.length} registros. Documento académico; las firmas son simuladas y no tienen valor pericial.</p></section>}
     </div>
   );

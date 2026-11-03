@@ -24,7 +24,26 @@ export default function Dashboard() {
       <div className="dashboard-cols">
         <section className="card"><div className="card-head"><h2>Tareas pendientes</h2></div>
           {data.tareas.length === 0 ? <Empty icon="check" title="Sin tareas pendientes" text="No hay acciones que requieran su atención." /> :
-            data.tareas.map((t: any) => <div className="list-row" key={t.tipo + t.id}><Icon n="alert" /><div className="body"><strong>{t.texto}</strong><div className="small muted">{t.ref}</div></div><Link className="btn mini" to={RUTA[t.tipo]}>Abrir</Link></div>)}
+            data.tareas.map((t: any) => {
+              const esCopia = t.texto?.toLowerCase().includes('copia autorizada');
+              return (
+                <div className="list-row" key={t.tipo + t.id}>
+                  <Icon n={esCopia ? 'key' : 'alert'} />
+                  <div className="body">
+                    <strong>{t.texto}</strong>
+                    <div className="small muted">{t.ref}</div>
+                  </div>
+                  {esCopia ? (
+                    <div className="row wrap" style={{ gap: 6 }}>
+                      <Link className="btn mini" to="/solicitudes">Solicitudes</Link>
+                      <Link className="btn mini primary" to={`/analisis?inicial=${t.id}`}>Registrar análisis</Link>
+                    </div>
+                  ) : (
+                    <Link className="btn mini" to={RUTA[t.tipo] || '/'}>Abrir</Link>
+                  )}
+                </div>
+              );
+            })}
         </section>
         <section className="card"><div className="card-head"><h2>Actividad reciente</h2></div>
           {data.recientes.length === 0 ? <Empty icon="clock" title="Sin actividad" /> :
